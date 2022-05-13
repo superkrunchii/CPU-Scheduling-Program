@@ -2,14 +2,36 @@
 #include <string.h>
 #include <stdlib.h>
 
-void RoundRobin() {
+struct Process {
+    int pNo;
+    int startTime[99];
+    int endTime[99];
+    int arrivalTime;
+    int burstTime;
+    int waitingTime;
+};
+
+
+void sortByArrivalTime(int settings[] , int tasks[][2]) {
+    
+    
+    
+
+
+} 
+
+
+void RoundRobin(int settings[], struct Process process[]) {
+
+    int timeSlice = settings[2];
+    
 
 }
 
-void SRTF() {
+void SRTF(int settings[], struct Process process[]){
 
+    
 }
-
 
 int main() {
 
@@ -39,7 +61,7 @@ int main() {
 
         printf("%d %d %d\n", settings[0], settings[1], settings[2]);
 
-        int tasks[settings[1]][2];
+        struct Process process[settings[1]];
 
         fgets(test, 3, f); // Remove Extra Spaces
 
@@ -47,23 +69,33 @@ int main() {
 
             fgets(test, 2, f);
 
-            tasks[i][0] = atoi(test);
+            process[i].pNo = atoi(test);
 
             fgets(test, 3, f);
 
-            tasks[i][1] = atoi(test);
+            process[i].arrivalTime = atoi(test);
 
             fgets(test, 3, f);
 
-            tasks[i][2] = atoi(test);
+            process[i].burstTime = atoi(test);
 
             fgets(test, 3, f); // Remove Extra Spaces
 
-            printf("%d %d %d\n" , tasks[i][0] , tasks[i][1] , tasks[i][2]);
-
+            printf("%d %d %d\n", process[i].pNo, process[i].arrivalTime, process[i].burstTime);
         }
 
-        
+        if(settings[0] == 1) {
+            
+        } else if(settings[0] == 2) {
+
+        } else if(settings[0] == 3) {
+            SRTF(settings, process);
+        } else if(settings[0] == 4) {
+            RoundRobin(settings, process);
+        }
+
+
+
         
 
     }

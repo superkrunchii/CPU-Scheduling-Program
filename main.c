@@ -131,12 +131,6 @@ void RoundRobin(int settings[], struct Process process[]) {
     int currentTime = 0;
     sortByArrivalTime(process, settings);
 
-    
-    //Check if Sorted Properly
-    for(int i = 0; i < settings[1]; i++) {
-        printf("%d %d %d\n" , process[i].pNo, process[i].arrivalTime, process[i].burstTime); 
-    }
-    
    
    while(workingProcess != 0) {
        
@@ -165,6 +159,7 @@ void RoundRobin(int settings[], struct Process process[]) {
         j++;
 
    }
+
    int totalWTime = 0;
    for(k = 0; k < settings[1]; k++) {
 
@@ -217,10 +212,6 @@ void SRTF(int settings[], struct Process process[]){
     sortByArrivalTime(process, settings);
     sortByBurstTime(process, settings);
     
-    // Check if sorted properly
-    for(i = 0; i < settings[1]; i++) {
-        printf("%d %d %d\n" , process[i].pNo, process[i].arrivalTime, process[i].burstTime); 
-    }
 
     int firstArrIndex = 0;
     int firstArr = process[0].arrivalTime;
@@ -243,13 +234,6 @@ void SRTF(int settings[], struct Process process[]){
 
     sortByArrivalTime(process, settings);
     sortByBurstTime(process, settings);
-    printf("\n");
-
-    // Check if sorted properly
-    for (i = 0; i < settings[1]; i++)
-    {   
-        printf("%d %d %d\n", process[i].pNo, process[i].arrivalTime, process[i].burstTime);
-    }
 
     firstArr = process[0].arrivalTime;
 
@@ -342,8 +326,6 @@ int main() {
     } else {
 
         fscanf(f, "%d %d %d", &settings[0], &settings[1], &settings[2]);
-
-        printf("%d %d %d\n", settings[0], settings[1], settings[2]);
 
         struct Process process[settings[1]];
 

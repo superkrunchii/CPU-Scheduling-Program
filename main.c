@@ -20,7 +20,7 @@ void sortByBurstTime(struct Process process[] , int settings[])
         min = i;
 
         for(j = i + 1; j < settings[1]; j++) {
-            if(process[j].burstTime > process[min].burstTime) 
+            if(process[j].burstTime < process[min].burstTime) 
                 min = j;
         }
 
@@ -39,8 +39,6 @@ void sortByBurstTime(struct Process process[] , int settings[])
 
 }
 
-
-// Warning: Does not work properly when there is two the same arrival time, should try to fix this first
 void sortByArrivalTime(struct Process process[], int settings[])
 {
 
@@ -155,10 +153,6 @@ void RoundRobin(int settings[], struct Process process[]) {
    }
 
 
-
-
-
-
  }
 
 void SRTF(int settings[], struct Process process[]){
@@ -182,35 +176,12 @@ void SRTF(int settings[], struct Process process[]){
     sortByArrivalTime(process, settings);
     sortByBurstTime(process, settings);
 
+    // Check if sorted properly
     for(int i = 0; i < settings[1]; i++) {
         printf("%d %d %d\n" , process[i].pNo, process[i].arrivalTime, process[i].burstTime); 
     }
 
-    /*while(workingProcess != 0) {
 
-        for(i = 0; i < settings[1]; i++) {
-
-            int smallestBurst = 9999;
-            int smallestIndex = 0;
-
-            for(k = 0; k < settings[1]; i++) {
-                if(smallestBurst < process[k].burstTime && processProgress[k] == 0) {
-                    smallestBurst = process[k].burstTime;
-                    smallestIndex = k;
-                }
-            }
-
-            if(process[i].arrivalTime < process[smallestIndex].arrivalTime) {
-                process[i].burstTime -= process[smallestIndex].arrivalTime;
-
-            }
-
-        }
-
-
-
-    }
-    */
 
 
 }

@@ -68,7 +68,6 @@ void sortByArrivalTime(struct Process process[], int settings[])
     for (i = 0; i < settings[1] - 1; i++)
     {
         min = i;
-
         for (j = i + 1; j < settings[1]; j++)
         {
             if (process[j].arrivalTime < process[min].arrivalTime)
@@ -107,15 +106,63 @@ void sortByArrivalTime(struct Process process[], int settings[])
             process[i].startTime[l] = temp;
         }
     }
+}
 
+void FCFS(int settings[], struct Process process[]) {
+    int k;
+    int currentTime = 0;
+    int totalWTime = 0;
+
+    for(k = 0; k < settings[1]; k++) {
+        process[k].waitingTime = 0;
+    }
+
+    int i;
+    for(i = 0; i < settings[1]; i++) {
+        process[i].startTime[0] = currentTime;
+        process[i].waitingTime += currentTime - process[i].arrivalTime;
+        currentTime += process[i].burstTime;
+        process[i].endTime[0] = currentTime;
+        printf("P[%d] Start Time: %d End time: %d |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
+        printf(" Waiting time: %d\n" , process[i].waitingTime);
+        totalWTime += process[i].waitingTime;
+    }
+
+    float ave = (float) totalWTime / settings[1];
+    printf("Average waiting time: %.1f", ave);
+}
+
+void SJF(int settings[], struct Process process[]) {
+    int k;
+    int currentTime = 0;
+    int totalWTime = 0;
+
+    for(k = 0; k < settings[1]; k++) {
+        process[k].waitingTime = 0;
+    }
+
+    int i = 0;
+    sortByBurstTime(process, settings);
+
+    for(i = 0; i < settings[1]; i++) {
+        process[i].startTime[0] = currentTime;
+        process[i].waitingTime += currentTime;
+        currentTime += process[i].burstTime;
+        process[i].endTime[0] = currentTime;
+        printf("P[%d] Start Time: %d End time: %d |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
+        printf(" Waiting time: %d\n" , process[i].waitingTime);
+        totalWTime += process[i].waitingTime;
+    }
+
+    float ave = (float) totalWTime / settings[1];
+    printf("Average waiting time: %.1f", ave);
 }
 
 void RoundRobin(int settings[], struct Process process[]) {
-
     int timeSlice = settings[2];
     int workingProcess = settings[1];
     int processProgress[workingProcess];
-    int k , p;
+    int k, p;
 
     for(k = 0; k < workingProcess; k++) {
         processProgress[k] = 0;
@@ -129,67 +176,66 @@ void RoundRobin(int settings[], struct Process process[]) {
     int i = 0;
     int j = 0;
     int currentTime = 0;
-    sortByArrivalTime(process, settings);
+    sortByBurstTime(process, settings);
 
-   
-   while(workingProcess != 0) {
-       
-       for(i = 0; i < settings[1]; i++) {
+    while(workingProcess != 0) {
+        
+        for(i = 0; i < settings[1]; i++) {
 
-           if(processProgress[i] == 0) {
-               process[i].startTime[j] = currentTime;
-               process[i].waitingTime += currentTime - process[i].arrivalTime;
-               if (timeSlice < process[i].burstTime){
-                   currentTime += timeSlice;
-                   process[i].burstTime -= timeSlice;
-                   process[i].endTime[j] = currentTime;
-                   process[i].timeLength += 1;
-               } else {
-                   currentTime += process[i].burstTime;
-                   process[i].endTime[j] = currentTime;
-                   process[i].burstTime = 0;
-                   processProgress[i] = 1;
-                   workingProcess -= 1;
-                   process[i].timeLength += 1;
-               }
-           }
+            if(processProgress[i] == 0) {
+                process[i].startTime[j] = currentTime;
+                process[i].waitingTime += currentTime - process[i].arrivalTime;
+                if (timeSlice < process[i].burstTime){
+                    currentTime += timeSlice;
+                    process[i].burstTime -= timeSlice;
+                    process[i].endTime[j] = currentTime;
+                    process[i].timeLength += 1;
+                } else {
+                    currentTime += process[i].burstTime;
+                    process[i].endTime[j] = currentTime;
+                    process[i].burstTime = 0;
+                    processProgress[i] = 1;
+                    workingProcess -= 1;
+                    process[i].timeLength += 1;
+                }
+            }
 
-       }
+        }
 
         j++;
 
-   }
+    }
 
-   int totalWTime = 0;
-   for(k = 0; k < settings[1]; k++) {
+    int totalWTime = 0;
+    for(k = 0; k < settings[1]; k++) {
 
-       for(int p = 0; p < process[k].timeLength; p++) {
+        for(int p = 0; p < process[k].timeLength; p++) {
 
-           if(p == 0) {
-               printf("P[%d] Start Time: %d End time: %d |", process[k].pNo, process[k].startTime[p], process[k].endTime[p]);
-           } else {
-               printf(" Start Time: %d End time: %d |", process[k].startTime[p], process[k].endTime[p]);
-               process[k].waitingTime = process[k].startTime[0];
-               for(int m = 0; m < process[k].timeLength - 1; m++) {
-                   process[k].waitingTime += process[k].startTime[m + 1] - process[k].endTime[m];
-               }
-           }
+            if(p == 0) {
+                printf("P[%d] Start Time: %d End time: %d |", process[k].pNo, process[k].startTime[p], process[k].endTime[p]);
+            } else {
+                printf(" Start Time: %d End time: %d |", process[k].startTime[p], process[k].endTime[p]);
+                process[k].waitingTime = process[k].startTime[0];
+                for(int m = 0; m < process[k].timeLength - 1; m++) {
+                    process[k].waitingTime += process[k].startTime[m + 1] - process[k].endTime[m];
+                }
+            }
 
-           if(p == process[k].timeLength - 1) {
-               printf(" Waiting time: %d\n" , process[k].waitingTime);
-               totalWTime += process[k].waitingTime;
-           }
-       }
+            if(p == process[k].timeLength - 1) {
+                printf(" Waiting time: %d\n" , process[k].waitingTime);
+                totalWTime += process[k].waitingTime;
+            }
+        }
 
-       if(k == settings[1] - 1) {
-           float ave = (float) totalWTime / settings[1];
+        if(k == settings[1] - 1) {
+            float ave = (float) totalWTime / settings[1];
 
-           printf("Average waiting time: %.1f", ave);
-       }
-   }
+            printf("Average waiting time: %.1f", ave);
+        }
+    }
 
 
- }
+    }
 
 void SRTF(int settings[], struct Process process[]){
 
@@ -247,9 +293,7 @@ void SRTF(int settings[], struct Process process[]){
     }
     
     while(workingProcess != 0) {
-
         for(i = 0; i < settings[1]; i++) {
-
             if(i == firstArrIndex) {
                 process[i].startTime[1] = currentTime;
                 process[i].waitingTime += currentTime;
@@ -265,18 +309,14 @@ void SRTF(int settings[], struct Process process[]){
                 workingProcess -= 1;
                 process[i].timeLength += 1;
             }
-
         }
-
     }
 
     int totalWTime = 0;
     for (k = 0; k < settings[1]; k++)
     {
-
         for (int p = 0; p < process[k].timeLength; p++)
         {
-
             if (p == 0)
             {
                 printf("P[%d] Start Time: %d End time: %d |", process[k].pNo, process[k].startTime[p], process[k].endTime[p]);
@@ -290,14 +330,12 @@ void SRTF(int settings[], struct Process process[]){
                     process[k].waitingTime += process[k].startTime[m + 1] - process[k].endTime[m];
                 }
             }
-
             if (p == process[k].timeLength - 1)
             {
                 printf(" Waiting time: %d\n", process[k].waitingTime);
                 totalWTime += process[k].waitingTime;
             }
         }
-
         if (k == settings[1] - 1)
         {
             float ave = (float)totalWTime / settings[1];
@@ -322,9 +360,7 @@ int main() {
 
     if(f == NULL) {
         perror("File does not exist");
-
     } else {
-
         fscanf(f, "%d %d %d", &settings[0], &settings[1], &settings[2]);
 
         struct Process process[settings[1]];
@@ -332,28 +368,18 @@ int main() {
         for(i = 0; i < settings[1]; i++) {
 
             fscanf(f, "%d %d %d", &process[i].pNo, &process[i].arrivalTime, &process[i].burstTime);
-
-            //printf("%d %d %d\n", process[i].pNo, process[i].arrivalTime, process[i].burstTime);
         }
 
         if(settings[0] == 0) {
-            
+            FCFS(settings, process);
         } else if(settings[0] == 1) {
-
+            SJF(settings, process);
         } else if(settings[0] == 2) {
             SRTF(settings, process);
         } else if(settings[0] == 3) {
             RoundRobin(settings, process);
         }
-
-
-
-        
-
     }
-    
     fclose(f);
-    
-
     return 0;
 }

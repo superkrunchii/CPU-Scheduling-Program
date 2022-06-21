@@ -139,29 +139,60 @@ void FCFS(int settings[], struct Process process[]) {
     printf("Average waiting time: %.1f", ave);
 }
 
-void SJF(int settings[], struct Process process[]) {
-    int k;
-    int currentTime = 0;
-    int totalwaitTime = 0;
+void swap(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
 
-    for(k = 0; k < settings[1]; k++) {
+void SJF(int settings[], struct Process process[]) {
+    int j, k, p;
+    int currentTime = 0;
+    int totalWTime = 0;
+    int x = 1000;
+
+    for (k = 0; k < settings[1]; k++)
+    {
         process[k].waitingTime = 0;
     }
 
     int i = 0;
-    sortByBurstTime(process, settings);
+    sortByArrivalTime(process, settings);
 
-    for(i = 0; i < settings[1]; i++) {
+    process[0].endTime[0] = process[0].arrivalTime + process[0].burstTime;
+    currentTime += process[0].endTime[0];
+    for (i = 1; i < settings[1]; i++)
+    {
+        for (j = i; j < settings[1]; j++)
+        {
+            if (process[j].arrivalTime <= process[i - 1].endTime[0])
+            {
+                if (process[j].burstTime < x)
+                {
+                    x = process[j].burstTime;
+                    p = j;
+                }
+            }
+        }
+        swap(&process[i].pNo, &process[p].pNo);
+        swap(&process[i].arrivalTime, &process[p].arrivalTime);
+        swap(&process[i].burstTime, &process[p].burstTime);
+        x = 1000;
         process[i].startTime[0] = currentTime;
-        process[i].waitingTime += currentTime;
         currentTime += process[i].burstTime;
+        process[i].waitingTime = currentTime - process[i].arrivalTime - process[i].burstTime;
         process[i].endTime[0] = currentTime;
-        printf("P[%i] Start Time: %i End time: %i |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
-        printf(" Waiting time: %i\n" , process[i].waitingTime);
-        totalwaitTime += process[i].waitingTime;
+        totalWTime += process[i].waitingTime;
     }
 
-    float ave = (float) totalwaitTime / settings[1];
+    for (i = 0; i < settings[1]; i++)
+    {
+        printf("P[%d] Start Time: %d End time: %d |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
+        printf(" Waiting time: %d\n", process[i].waitingTime);
+    }
+
+    float ave = (float)totalWTime / settings[1];
     printf("Average waiting time: %.1f", ave);
 }
 
@@ -360,9 +391,8 @@ void SRTF(int settings[], struct Process process[]){
             currentTime++;
     }
 
-
-    float avgwaitTime = 0;
     int z, temp;
+    float avgwaitTime = 0;
     for (i = 0; i < settings[1]; i++)
     {
         temp = 0;

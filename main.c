@@ -415,53 +415,53 @@ void SRTF(int settings[], struct Process process[]){
 
 }
 
-    int main()
+int main()
+{
+
+    char filename[50];
+    char test[4];
+    char temp[4];
+    int settings[3];
+    int i;
+
+    printf("Enter filename: ");
+
+    scanf("%s", filename);
+    FILE *f = fopen(strcat(filename, ".txt"), "r");
+
+    if (f == NULL)
     {
+        perror("File does not exist");
+    }
+    else
+    {
+        fscanf(f, "%i %i %i", &settings[0], &settings[1], &settings[2]);
 
-        char filename[50];
-        char test[4];
-        char temp[4];
-        int settings[3];
-        int i;
+        struct Process process[settings[1]];
 
-        printf("Enter filename: ");
-
-        scanf("%s", filename);
-        FILE *f = fopen(strcat(filename, ".txt"), "r");
-
-        if (f == NULL)
+        for (i = 0; i < settings[1]; i++)
         {
-            perror("File does not exist");
+
+            fscanf(f, "%i %i %i", &process[i].pNo, &process[i].arrivalTime, &process[i].burstTime);
         }
-        else
+
+        if (settings[0] == 0)
         {
-            fscanf(f, "%i %i %i", &settings[0], &settings[1], &settings[2]);
-
-            struct Process process[settings[1]];
-
-            for (i = 0; i < settings[1]; i++)
-            {
-
-                fscanf(f, "%i %i %i", &process[i].pNo, &process[i].arrivalTime, &process[i].burstTime);
-            }
-
-            if (settings[0] == 0)
-            {
-                FCFS(settings, process);
-            }
-            else if (settings[0] == 1)
-            {
-                SJF(settings, process);
-            }
-            else if (settings[0] == 2)
-            {
-                SRTF(settings, process);
-            }
-            else if (settings[0] == 3)
-            {
-                RoundRobin(settings, process);
-            }
+            FCFS(settings, process);
         }
-        fclose(f);
-        return 0;
+        else if (settings[0] == 1)
+        {
+            SJF(settings, process);
+        }
+        else if (settings[0] == 2)
+        {
+            SRTF(settings, process);
+        }
+        else if (settings[0] == 3)
+        {
+            RoundRobin(settings, process);
+        }
+    }
+    fclose(f);
+    return 0;
 }

@@ -12,6 +12,13 @@ struct Process {
     int timeLength;
 };
 
+struct tempProcess {
+	int pNo;
+	int waitTime;
+    int startTime[99];
+    int endTime[99];
+};
+
 void sortByBurstTime(struct Process process[] , int settings[])
 {
     int i, j , min, temp;
@@ -111,7 +118,7 @@ void sortByArrivalTime(struct Process process[], int settings[])
 void FCFS(int settings[], struct Process process[]) {
     int k;
     int currentTime = 0;
-    int totalWTime = 0;
+    int totalwaitTime = 0;
 
     for(k = 0; k < settings[1]; k++) {
         process[k].waitingTime = 0;
@@ -123,19 +130,19 @@ void FCFS(int settings[], struct Process process[]) {
         process[i].waitingTime += currentTime - process[i].arrivalTime;
         currentTime += process[i].burstTime;
         process[i].endTime[0] = currentTime;
-        printf("P[%d] Start Time: %d End time: %d |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
-        printf(" Waiting time: %d\n" , process[i].waitingTime);
-        totalWTime += process[i].waitingTime;
+        printf("P[%i] Start Time: %i End time: %i |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
+        printf(" Waiting time: %i\n" , process[i].waitingTime);
+        totalwaitTime += process[i].waitingTime;
     }
 
-    float ave = (float) totalWTime / settings[1];
+    float ave = (float) totalwaitTime / settings[1];
     printf("Average waiting time: %.1f", ave);
 }
 
 void SJF(int settings[], struct Process process[]) {
     int k;
     int currentTime = 0;
-    int totalWTime = 0;
+    int totalwaitTime = 0;
 
     for(k = 0; k < settings[1]; k++) {
         process[k].waitingTime = 0;
@@ -149,12 +156,12 @@ void SJF(int settings[], struct Process process[]) {
         process[i].waitingTime += currentTime;
         currentTime += process[i].burstTime;
         process[i].endTime[0] = currentTime;
-        printf("P[%d] Start Time: %d End time: %d |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
-        printf(" Waiting time: %d\n" , process[i].waitingTime);
-        totalWTime += process[i].waitingTime;
+        printf("P[%i] Start Time: %i End time: %i |", process[i].pNo, process[i].startTime[0], process[i].endTime[0]);
+        printf(" Waiting time: %i\n" , process[i].waitingTime);
+        totalwaitTime += process[i].waitingTime;
     }
 
-    float ave = (float) totalWTime / settings[1];
+    float ave = (float) totalwaitTime / settings[1];
     printf("Average waiting time: %.1f", ave);
 }
 
@@ -206,15 +213,15 @@ void RoundRobin(int settings[], struct Process process[]) {
 
     }
 
-    int totalWTime = 0;
+    int totalwaitTime = 0;
     for(k = 0; k < settings[1]; k++) {
 
         for(int p = 0; p < process[k].timeLength; p++) {
 
             if(p == 0) {
-                printf("P[%d] Start Time: %d End time: %d |", process[k].pNo, process[k].startTime[p], process[k].endTime[p]);
+                printf("P[%i] Start Time: %i End time: %i |", process[k].pNo, process[k].startTime[p], process[k].endTime[p]);
             } else {
-                printf(" Start Time: %d End time: %d |", process[k].startTime[p], process[k].endTime[p]);
+                printf(" Start Time: %i End time: %i |", process[k].startTime[p], process[k].endTime[p]);
                 process[k].waitingTime = process[k].startTime[0];
                 for(int m = 0; m < process[k].timeLength - 1; m++) {
                     process[k].waitingTime += process[k].startTime[m + 1] - process[k].endTime[m];
@@ -222,13 +229,13 @@ void RoundRobin(int settings[], struct Process process[]) {
             }
 
             if(p == process[k].timeLength - 1) {
-                printf(" Waiting time: %d\n" , process[k].waitingTime);
-                totalWTime += process[k].waitingTime;
+                printf(" Waiting time: %i\n" , process[k].waitingTime);
+                totalwaitTime += process[k].waitingTime;
             }
         }
 
         if(k == settings[1] - 1) {
-            float ave = (float) totalWTime / settings[1];
+            float ave = (float) totalwaitTime / settings[1];
 
             printf("Average waiting time: %.1f", ave);
         }
@@ -238,148 +245,193 @@ void RoundRobin(int settings[], struct Process process[]) {
     }
 
 void SRTF(int settings[], struct Process process[]){
+    int processNum = settings[1];
+    struct tempProcess temp_process[processNum];
 
-    int workingProcess = settings[1];
-    int processProgress[workingProcess];
     int i, k;
-    int currentTime = 0;
-
-    for (k = 0; k < workingProcess; k++)
+    for (i = 0; i < settings[1]; i++)
     {
-        processProgress[k] = 0;
-    }
-
-    for (k = 0; k < settings[1]; k++)
-    {
-        process[k].timeLength = 0;
-        process[k].waitingTime = 0;
+        for (k = 0; k < 50; k++)
+        {
+            temp_process[i].startTime[k] = 9999;
+            temp_process[i].endTime[k] = 9999;
+        }
     }
 
     sortByArrivalTime(process, settings);
-    sortByBurstTime(process, settings);
-    
 
-    int firstArrIndex = 0;
-    int firstArr = process[0].arrivalTime;
+    int currentTime = 0, finished = 0;
+    int startedProcess[processNum], completedProcess[processNum], tempBurst[settings[1]], remainingBurst[processNum], totalTime[processNum];
+    int tempIndex = -1;
 
-    // Do preemptive stuff
-    for (i = 0; i < settings[1]; i++)
+    for (i = 0; i < processNum; i++)
     {
-        if(process[i].arrivalTime < firstArr) {
-            firstArrIndex = i;
-            firstArr = process[i].arrivalTime;
-        }
+        completedProcess[i] = 0;
+        startedProcess[i] = 0;
+
+        temp_process[i].pNo = process[i].pNo;
+        remainingBurst[i] = process[i].burstTime;
+        tempBurst[i] = process[i].burstTime;
     }
 
-    process[firstArrIndex].burstTime -= process[0].arrivalTime;
-    process[firstArrIndex].startTime[0] = process[firstArrIndex].arrivalTime;
-    currentTime += process[0].arrivalTime;
-    process[firstArrIndex].endTime[0] = currentTime;
-    process[firstArrIndex].timeLength += 1;
-    process[firstArrIndex].waitingTime += process[firstArrIndex].arrivalTime;
-
-    sortByArrivalTime(process, settings);
-    sortByBurstTime(process, settings);
-
-    firstArr = process[0].arrivalTime;
-
-    for (i = 0; i < settings[1]; i++)
+    while (finished < processNum)
     {
-        if (process[i].arrivalTime < firstArr)
+        int currentIndex = -1;
+        int burstTemp = 9999;
+
+        for (i = 0; i < processNum; i++)
         {
-            firstArrIndex = i;
-            firstArr = process[i].arrivalTime;
-        }
-    }
-    
-    while(workingProcess != 0) {
-        for(i = 0; i < settings[1]; i++) {
-            if(i == firstArrIndex) {
-                process[i].startTime[1] = currentTime;
-                process[i].waitingTime += currentTime;
-                currentTime += process[i].burstTime;
-                process[i].endTime[1] = currentTime;
-                workingProcess -= 1;
-                process[i].timeLength += 1;
-            } else {
-                process[i].startTime[0] = currentTime;
-                process[i].waitingTime += currentTime - process[i].arrivalTime;
-                currentTime += process[i].burstTime;
-                process[i].endTime[0] = currentTime;
-                workingProcess -= 1;
-                process[i].timeLength += 1;
-            }
-        }
-    }
-
-    int totalWTime = 0;
-    for (k = 0; k < settings[1]; k++)
-    {
-        for (int p = 0; p < process[k].timeLength; p++)
-        {
-            if (p == 0)
+            if (process[i].arrivalTime <= currentTime && completedProcess[i] == 0)
             {
-                printf("P[%d] Start Time: %d End time: %d |", process[k].pNo, process[k].startTime[p], process[k].endTime[p]);
-            }
-            else
-            {
-                printf(" Start Time: %d End time: %d |", process[k].startTime[p], process[k].endTime[p]);
-                process[k].waitingTime = process[k].startTime[0];
-                for (int m = 0; m < process[k].timeLength - 1; m++)
+                if (remainingBurst[i] == burstTemp)
                 {
-                    process[k].waitingTime += process[k].startTime[m + 1] - process[k].endTime[m];
+                    if (process[i].arrivalTime < process[currentIndex].arrivalTime)
+                    {
+                        burstTemp = remainingBurst[i];
+                        currentIndex = i;
+                    }
+                }
+
+                if (remainingBurst[i] < burstTemp)
+                {
+                    burstTemp = remainingBurst[i];
+                    currentIndex = i;
+                }
+
+            }
+        }
+
+        if (currentIndex != tempIndex)
+        {
+            int temp = 0;
+
+            for (i = 0; i < 50 && temp == 0; i++)
+            {
+                if (temp_process[tempIndex].endTime[i] == 9999)
+                {
+                    temp_process[tempIndex].endTime[i] = currentTime;
+                    temp = 1;
                 }
             }
-            if (p == process[k].timeLength - 1)
-            {
-                printf(" Waiting time: %d\n", process[k].waitingTime);
-                totalWTime += process[k].waitingTime;
-            }
         }
-        if (k == settings[1] - 1)
-        {
-            float ave = (float)totalWTime / settings[1];
 
-            printf("Average waiting time: %.1f", ave);
-        }
+        if (currentIndex != -1)
+        {
+            if (remainingBurst[currentIndex] == process[currentIndex].burstTime)
+            {
+                int temp = 0;
+                if (tempIndex != currentIndex)
+                {
+                    for (i = 0; i < 50 && temp == 0; i++)
+                    {
+                        if (temp_process[currentIndex].startTime[i] == 9999)
+                        {
+                            temp_process[currentIndex].startTime[i] = currentTime;
+                            temp = 1;
+                        }
+                    }
+                    
+                    tempIndex = currentIndex;
+                }
+            }
+
+            remainingBurst[currentIndex]--;
+            process[currentIndex].burstTime--;
+            currentTime++;
+
+            if (remainingBurst[currentIndex] == 0)
+            {
+                int temp = 0;
+                for (i = 0; i < 50 && temp == 0; i++)
+                {
+                    if (temp_process[currentIndex].endTime[i] == 9999)
+                    {
+                        temp_process[currentIndex].endTime[i] = currentTime;
+                        totalTime[currentIndex] = temp_process[currentIndex].endTime[i] - process[currentIndex].arrivalTime;
+                        temp_process[currentIndex].waitTime = totalTime[currentIndex] - tempBurst[currentIndex];
+                    }
+                }
+                
+                completedProcess[currentIndex] = 1;
+                finished++;
+            }
+
+        } else
+            currentTime++;
     }
+
+
+    float avgwaitTime = 0;
+    int z, temp;
+    for (i = 0; i < settings[1]; i++)
+    {
+        temp = 0;
+        
+        for (z = 0; temp_process[i].startTime[z] != 9999 && temp_process[i].endTime[z] != 9999; z++)
+        { 
+            if(temp == 0) {
+                printf("P[%d] Start Time: %d End time: %d | ", temp_process[i].pNo, temp_process[i].startTime[z], temp_process[i].endTime[z]);
+                temp++;
+            } else 
+                printf("Start Time: %d End time: %d | ", temp_process[i].startTime[z], temp_process[i].endTime[z]);
+        }
+        
+        printf("Waiting Time: %d \n", temp_process[i].waitTime);
+        avgwaitTime += temp_process[i].waitTime;
+    }
+
+    avgwaitTime /= settings[1];
+    printf("Average waiting time: %.1f\n", avgwaitTime);
+
 }
 
-int main() {
+    int main()
+    {
 
-    char filename[50];
-    char test[4];
-    char temp[4];
-    int settings[3];
-    int i;
+        char filename[50];
+        char test[4];
+        char temp[4];
+        int settings[3];
+        int i;
 
-    printf("Enter filename: ");
+        printf("Enter filename: ");
 
-    scanf("%s" , filename);
-    FILE *f = fopen(strcat(filename , ".txt") , "r");
+        scanf("%s", filename);
+        FILE *f = fopen(strcat(filename, ".txt"), "r");
 
-    if(f == NULL) {
-        perror("File does not exist");
-    } else {
-        fscanf(f, "%d %d %d", &settings[0], &settings[1], &settings[2]);
-
-        struct Process process[settings[1]];
-
-        for(i = 0; i < settings[1]; i++) {
-
-            fscanf(f, "%d %d %d", &process[i].pNo, &process[i].arrivalTime, &process[i].burstTime);
+        if (f == NULL)
+        {
+            perror("File does not exist");
         }
+        else
+        {
+            fscanf(f, "%i %i %i", &settings[0], &settings[1], &settings[2]);
 
-        if(settings[0] == 0) {
-            FCFS(settings, process);
-        } else if(settings[0] == 1) {
-            SJF(settings, process);
-        } else if(settings[0] == 2) {
-            SRTF(settings, process);
-        } else if(settings[0] == 3) {
-            RoundRobin(settings, process);
+            struct Process process[settings[1]];
+
+            for (i = 0; i < settings[1]; i++)
+            {
+
+                fscanf(f, "%i %i %i", &process[i].pNo, &process[i].arrivalTime, &process[i].burstTime);
+            }
+
+            if (settings[0] == 0)
+            {
+                FCFS(settings, process);
+            }
+            else if (settings[0] == 1)
+            {
+                SJF(settings, process);
+            }
+            else if (settings[0] == 2)
+            {
+                SRTF(settings, process);
+            }
+            else if (settings[0] == 3)
+            {
+                RoundRobin(settings, process);
+            }
         }
-    }
-    fclose(f);
-    return 0;
+        fclose(f);
+        return 0;
 }

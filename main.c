@@ -214,30 +214,36 @@ void RoundRobin(int settings[], struct Process process[]) {
     int i = 0;
     int j = 0;
     int currentTime = 0;
-    sortByBurstTime(process, settings);
+
+    sortByArrivalTime(process, settings);
 
     while(workingProcess != 0) {
         
         for(i = 0; i < settings[1]; i++) {
 
-            if(processProgress[i] == 0) {
-                process[i].startTime[j] = currentTime;
-                process[i].waitingTime += currentTime - process[i].arrivalTime;
-                if (timeSlice < process[i].burstTime){
-                    currentTime += timeSlice;
-                    process[i].burstTime -= timeSlice;
-                    process[i].endTime[j] = currentTime;
-                    process[i].timeLength += 1;
-                } else {
-                    currentTime += process[i].burstTime;
-                    process[i].endTime[j] = currentTime;
-                    process[i].burstTime = 0;
-                    processProgress[i] = 1;
-                    workingProcess -= 1;
-                    process[i].timeLength += 1;
+            if(currentTime >= process[i].arrivalTime) {
+                if(processProgress[i] == 0) {
+                    process[i].startTime[j] = currentTime;
+                    process[i].waitingTime += (currentTime - process[i].arrivalTime);
+            
+                    if (timeSlice < process[i].burstTime){
+                        currentTime += timeSlice;
+                        process[i].burstTime -= timeSlice;
+                        process[i].endTime[j] = currentTime;
+                        process[i].timeLength += 1;
+                    } else {
+                        currentTime += process[i].burstTime;
+                        process[i].endTime[j] = currentTime;
+                        process[i].burstTime = 0;
+                        processProgress[i] = 1;
+                        workingProcess -= 1;
+                        process[i].timeLength += 1;
+                    }
                 }
+            } else {
+                process[i].timeLength += 1;
+                
             }
-
         }
 
         j++;
@@ -246,20 +252,31 @@ void RoundRobin(int settings[], struct Process process[]) {
 
     int totalwaitTime = 0;
     for(k = 0; k < settings[1]; k++) {
-
+        
         for(int p = 0; p < process[k].timeLength; p++) {
-
-            if(p == 0) {
+            
+            if(p == 0 && (process[k].endTime[p] != 0)  ) {
                 printf("P[%i] Start Time: %i End time: %i |", process[k].pNo, process[k].startTime[p], process[k].endTime[p]);
+            } else if(p == 0 && (process[k].endTime[p] == 0)) {
+
+                printf("P[%i] ", process[k].pNo);
+
+            } else if(p != 0 && (process[k].endTime[p] == 0) ){
+
             } else {
-                printf(" Start Time: %i End time: %i |", process[k].startTime[p], process[k].endTime[p]);
+                printf("Start Time: %i End time: %i |", process[k].startTime[p], process[k].endTime[p]);
                 process[k].waitingTime = process[k].startTime[0];
-                for(int m = 0; m < process[k].timeLength - 1; m++) {
+                for (int m = 0; m < process[k].timeLength - 1; m++)
+                {
                     process[k].waitingTime += process[k].startTime[m + 1] - process[k].endTime[m];
                 }
             }
 
             if(p == process[k].timeLength - 1) {
+                if (process[k].waitingTime - process[k].arrivalTime >= 0) {
+                    process[k].waitingTime -= process[k].arrivalTime;
+                }
+
                 printf(" Waiting time: %i\n" , process[k].waitingTime);
                 totalwaitTime += process[k].waitingTime;
             }
@@ -268,7 +285,7 @@ void RoundRobin(int settings[], struct Process process[]) {
         if(k == settings[1] - 1) {
             float ave = (float) totalwaitTime / settings[1];
 
-            printf("Average waiting time: %.1f", ave);
+            printf("Average waiting time: %.2f", ave);
         }
     }
 
